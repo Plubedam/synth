@@ -273,9 +273,13 @@ impl<T: SqlxDataSource> TryFrom<(&T, Vec<ColumnInfo>)> for Collection {
         for column_info in columns_meta.1 {
             let content = FieldContentWrapper::try_from((columns_meta.0, &column_info))?.0;
 
+            if content.is_ignored() {
+                continue;
+            } else {
             collection
                 .fields
                 .insert(column_info.column_name.clone(), content);
+            }
         }
 
         Ok(Collection {
@@ -295,7 +299,7 @@ impl<T: SqlxDataSource> TryFrom<(&T, &ColumnInfo)> for FieldContentWrapper {
     fn try_from(column_meta: (&T, &ColumnInfo)) -> Result<Self> {
         let mut content = column_meta.0.decode_to_content(column_meta.1)?;
 
-        if column_meta.1.is_nullable {
+        if column_meta.1.is_nullable && !content.is_ignored(){
             content = content.into_nullable();
         }
 

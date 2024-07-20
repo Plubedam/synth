@@ -108,6 +108,8 @@ pub struct NullContent;
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Hash)]
 pub struct EmptyContent;
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Hash)]
+pub struct IgnoreContent;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ContentLabels {
@@ -317,6 +319,7 @@ content! {
         Datasource(DatasourceContent) => "missing a `path` field",
         Hidden(HiddenContent) => "missing a `content` field",
         Empty(EmptyContent) => None,
+        Ignore(IgnoreContent) => None,
     }
 }
 
@@ -369,6 +372,10 @@ impl Content {
 
     pub fn is_hidden(&self) -> bool {
         matches!(self, Self::Hidden(_))
+    }
+
+    pub fn is_ignored(&self) -> bool {
+        matches!(self, Self::Ignore(_))
     }
 
     pub fn is_unique(&self) -> bool {
@@ -511,6 +518,7 @@ impl Content {
             Content::Hidden(_) => "hidden".to_string(),
             Content::Datasource(_) => "datasource".to_string(),
             Content::Empty(_) => "empty".to_string(),
+            Content::Ignore(_) => "ignore".to_string()
         }
     }
 }
@@ -642,6 +650,7 @@ impl Compile for Content {
             Self::Null(_) => Ok(Graph::null()),
             Self::Datasource(datasource) => datasource.compile(compiler),
             Self::Empty(_) => Err(anyhow!("unexpected empty object")),
+            Self::Ignore(_) => Ok(Graph::null()),
         }
     }
 }

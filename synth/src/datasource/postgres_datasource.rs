@@ -197,7 +197,7 @@ impl SqlxDataSource for PostgresDataSource {
                     RegexContent::pattern(pattern).context("pattern will always compile")?,
                 ))
             }
-            "tsvector" => Content::String(StringContent::default()),
+            "tsvector" => Content::Ignore(IgnoreContent),
             "int2" => Content::Number(NumberContent::I16(I16::Range(RangeStep::default()))),
             "int4" => Content::Number(NumberContent::I32(I32::Range(RangeStep::default()))),
             "int8" => Content::Number(NumberContent::I64(I64::Range(RangeStep::default()))),
@@ -348,7 +348,7 @@ fn try_match_value(row: &PgRow, column: &PgColumn) -> Result<Value> {
         "oid" => {
             bail!("OID data type not supported for Postgresql")
         }
-        "char" | "varchar" | "text" | "citext" | "bpchar" | "name" | "tsvector" | "unknown" => {
+        "char" | "varchar" | "text" | "citext" | "bpchar" | "name" | "unknown" => {
             Value::String(row.try_get::<String, &str>(column.name())?)
         }
         "int2" => Value::Number(row.try_get::<i16, &str>(column.name())?.into()),
